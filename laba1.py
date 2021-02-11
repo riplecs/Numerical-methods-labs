@@ -1,0 +1,212 @@
+import numpy as np
+import math
+import matplotlib.pyplot as plt
+import pandas as pd
+
+func = lambda x: x**5+x**4-2*x**3-9*x**2-3*x-2
+x=np.linspace(-10, 10, 100)
+plt.grid()
+plt.axis([-10, 10, -30, 30])
+plt.plot(x, func(x))
+
+
+print('Метод Лагранжа:')
+a_n=[-2, -3, -9, -2, 1, 1]; n=len(a_n)
+F_1=[]; F_2=[]
+for i in reversed(range(len(a_n))):
+    if a_n[i]>0:
+        F_1.insert(n-i, a_n[i])
+        F_2.insert(n-i, 0)
+    else: 
+        F_2.insert(n-i, a_n[i])
+        F_1.insert(n-i, 0)
+print(np.poly1d(F_1), ' = Ф(x)')
+print(np.poly1d(F_2), ' = F(x)')
+alpha=1
+while func(alpha)<=0:
+    alpha=alpha+1
+print(f'α={alpha}>0: P(α) = {func(alpha)} > 0, отже ∀ x* < {alpha}')
+
+print('Теорема про кільце:')
+A=abs(max(a_n[1:], key=abs))
+B=abs(max(a_n[:(len(a_n)-1)], key=abs))
+print(f'A = max(|a_i|) (i=0, 1, ..., 4) = {A}\nB = max(|a_i|) (i=1, 2, ..., 5) = {B}')
+left=abs(a_n[0])/(B+abs(a_n[0])); rigth=(abs(a_n[len(a_n)-1])+A)/abs(a_n[len(a_n)-1])
+print(f'Всі корені лежать у кільці: {left} =< |x*| =< {rigth}')
+
+
+print('Теорема про верхню межу додатніх коренів:')
+a_neg=[]
+for i in range(len(a_n)):
+    if a_n[i]<0: a_neg.append(a_n[i])
+B=abs(max(a_neg, key=abs))
+print(f'B = max(|a_i|) (a_i<0; i=0, ..., n) = {B}')
+def find(a):
+    m=None
+    for i in reversed(range(len(a))):
+        if a[i]<0:
+            m=i
+            print(f'm = max(i) (a_i<0; i=0, ..., n) = {i}')        
+            return m
+            break
+    if m is None: print('Рівняння не має додатніх коренів.')
+
+R1=1+math.pow((B/a_n[len(a_n)-1]), 1/(len(a_n)-1-find(a_n)))
+print(f'R = {R1} - верхня межа додатніх коренів.')
+
+print('Для знаходження нижньої межі додатніх коренів зробимо заміну x=1/y і отримаємо наступне рівняння:')
+print(np.poly1d(a_n, variable='y'))
+if a_n[0]<0:
+    a_nn=[]
+    for i in range(len(a_n)):
+        a_nn.append((-1*a_n[i]))
+    print('Домножимо на -1:\n', np.poly1d(a_nn, variable='y'))
+else: a_nn=a_n
+a_nn.reverse()
+print(a_nn)
+R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+R2=1/R
+print(f'R = {R2} - нижня межа додатніх коренів.')
+
+
+print("Для знаходження нижньої межі від'ємних коренів зробимо заміну x=-x і отримаємо наступне рівняння:")
+a_n.reverse()
+for i in range(len(a_n)):
+    if i%2==0: a_n[i]=-a_n[i]
+print(np.poly1d(a_n))
+if a_n[0]<0:
+    a_nn=[]
+    for i in range(len(a_n)):
+        a_nn.append((-1*a_n[i]))
+    print('Домножимо на -1:\n', np.poly1d(a_nn))
+else: a_nn=a_n
+a_nn.reverse()
+print(a_nn)
+R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+R3=-1*R
+print(f"R = {R3} - нижня межа від'ємних коренів.")
+
+print("Для знаходження верхньої межі від'ємних коренів зробимо заміну x=-1/y і отримаємо наступне рівняння:")
+print(np.poly1d(a_nn, variable='y'))
+a_nn.reverse()
+print(a_nn)
+R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+R4=-1/R
+print(f"R = {R4} - верхня межа від'ємних коренів.")
+
+
+print('Теорема Гюа про наявність комплесних коренів:')
+a_n.reverse()
+for i in range(1, len(a_n)-1):
+    if a_n[i]**2<a_n[i-1]*a_n[i+1]:
+        print(f'Існує таке k, що (a_k)^2<a_(k-1)*a_(k+1), k = {i}: {a_n[i]}^2={pow(a_n[i], 2)}<{a_n[i-1]}*{a_n[i+1]}={a_n[i-1]*a_n[i+1]}, отже рівняння має комплексні корені.')
+        break
+    if i==len(a_n)-2: 
+        print('Рівняння не має комплексних коренів.')    
+       
+
+
+print('Теорема Штурма:')
+f=np.poly1d([1, 1, -2, -9, -3, -2])
+print(f)
+f0=f
+f1=np.poly1d([5, 4, -6, -18, -3])
+f2=np.polymul(np.polydiv(f0, f1)[1], -1)
+f3=np.polymul(np.polydiv(f1, f2)[1], -1)
+f4=np.polymul(np.polydiv(f2, f3)[1], -1)
+f5=np.polymul(np.polydiv(f3, f4)[1], -1)
+mas=[f2, f3, f4, f5]
+print('Загальна формула: f_(i+1)=-[f_(i-1) mod f_i]')
+print(f0, ' = f0')
+print(f1, ' = f1')
+print(mas[0], ' = f2')
+print(mas[1], ' = f3')
+print(mas[2], ' = f4')
+print(mas[3], ' = f5')
+
+a=max(left, R2)
+b=min(alpha, rigth, R1)
+c=R4
+d=R3
+points=[d, c, a, b]
+eps=0.00001
+
+df=pd.DataFrame({'f': ['f0', 'f1', 'f2', 'f3', 'f4', 'f5'], f'f({d})':[f'{f0(d)}', f'{f1(d)}', f'{f2(d)}', f'{f3(d)}', f'{f4(d)}', f'{f5(d)}'], f'f({c})':[f'{f0(c)}', f'{f1(c)}', f'{f2(c)}', f'{f3(c)}', f'{f4(c)}', f'{f5(c)}'], f'f({a})':[f'{f0(a)}', f'{f1(a)}', f'{f2(a)}', f'{f3(a)}', f'{f4(a)}', f'{f5(a)}'], f'f({b})':[f'{f0(b)}', f'{f1(b)}', f'{f2(b)}', f'{f3(b)}', f'{f4(b)}', f'{f5(b)}']})
+df.set_index('f')
+
+def count(num):
+    k=0
+    for i in range(len(df[f'f({num})'])-1):
+        if (float(df[f'f({num})'][i])>0 and float(df[f'f({num})'][i+1])<0) or (float(df[f'f({num})'][i])<0 and float(df[f'f({num})'][i+1])>0):
+            k=k+1
+    return k
+
+for i in points:
+    print(f'ККЗ у точці {i}: ', count(i))
+for i in range(len(points)-1):
+    print(f'Кількість коренів на проміжку [{points[i]}, {points[i+1]}] = ', count(points[i])-count(points[i+1]))
+    if count(points[i])-count(points[i+1])>0:
+        a=points[i]
+        b=points[i+1]
+print(f'a = {a}\nb = {b}')
+
+
+def bisection(x, y):
+    z=(x+y)/2
+    i=0
+    while abs(x-y)>eps:
+        i=i+1
+        z=(x+y)/2
+        if func(x)*func(z)<=0:
+            y=z
+        else: x=z
+        print(f'{i}) a = {x}, b = {y}')
+    return (x+y)/2
+
+print('Метод бісекції:')
+x_bisection=bisection(a, b)
+print(f'Корінь рівняння з проміжку [{a}, {b}] дорівнює: ', x_bisection)
+
+def horda(x, y):
+    i=0
+    z=(x*func(y)-y*func(x))/(func(y)-func(x))
+    while abs(func(z))>eps:
+        i=i+1
+        z=(x*func(y)-y*func(x))/(func(y)-func(x))
+        if func(x)*func(z)<=0:
+            y=z
+        else: x=z 
+        print(f'{i}) a = {x}, b = {y}')
+    return (x*func(y)-y*func(x))/(func(y)-func(x))
+
+print('Метод хорд:')
+x_horda=horda(a, b)
+print(f'Корінь рівняння з проміжку [{a}, {b}] дорівнює: ', x_horda) 
+
+d_func=lambda x: 5*x**4+4*x**3-6*x**2-18*x-3
+def newton(x, y):
+    i=0
+    x0=(x+y)/2
+    x1=x0-func(x0)/d_func(x0)
+    while(abs(func(x1))>eps):
+        i=i+1
+        print(f'{i}) a = {x0}, b = {x1}')
+        x0=(x1+x0)/2
+        x1=x0-func(x0)/d_func(x0)
+    return x1
+
+print('Метод Ньютона:')
+x_newton=newton(a, b)
+print(f'Корінь рівняння з проміжку [{a}, {b}] дорівнює: ', x_newton)  
+
+
+res_b=func(x_bisection)
+res_h=func(x_horda)
+res_n=func(x_newton)
+print(f'Бісекція: f({x_bisection}) = {res_b}\nХорди: f({x_horda}) = {res_h}\nНьютон: f({x_newton}) = {res_n}')
+if min([res_b, res_h, res_n], key=abs)==res_b:
+    print(f'Найбільш точне значення отримано методом бісекції.')
+elif min([res_b, res_h, res_n], key=abs)==res_h:
+    print(f'Найбільш точне значення отримано методом хорд.')
+else:
+    print(f'Найбільш точне значення отримано методом Ньютона.')
