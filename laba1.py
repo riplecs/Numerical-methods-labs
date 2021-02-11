@@ -8,7 +8,7 @@ x=np.linspace(-10, 10, 100)
 plt.grid()
 plt.axis([-10, 10, -30, 30])
 plt.plot(x, func(x))
-
+plt.show()
 
 print('Метод Лагранжа:')
 a_n=[-2, -3, -9, -2, 1, 1]; n=len(a_n)
