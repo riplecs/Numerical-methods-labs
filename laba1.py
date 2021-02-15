@@ -12,20 +12,76 @@ plt.show()
 
 print('Метод Лагранжа:')
 a_n=[-2, -3, -9, -2, 1, 1]; n=len(a_n)
-F_1=[]; F_2=[]
-for i in reversed(range(len(a_n))):
-    if a_n[i]>0:
-        F_1.insert(n-i, a_n[i])
-        F_2.insert(n-i, 0)
-    else: 
-        F_2.insert(n-i, a_n[i])
-        F_1.insert(n-i, 0)
-print(np.poly1d(F_1), ' = Ф(x)')
-print(np.poly1d(F_2), ' = F(x)')
-alpha=1
-while func(alpha)<=0:
-    alpha=alpha+1
-print(f'α={alpha}>0: P(α) = {func(alpha)} > 0, отже ∀ x* < {alpha}')
+print(np.poly1d(a_n[::-1]), ' = P(x)')
+def Lagrange(f, z):
+    k=0
+    F=[]; Ф=[]
+    for i in reversed(f):
+        if i>0:
+            F.insert(0, i)
+            k=k+1
+        if i<0: break      
+    for i in reversed(range(len(f)-k)):
+        if f[i]<0:
+            F.insert(0, f[i])
+        else: F.insert(0, 0)
+    for i in reversed(f):
+        if i in F:
+            Ф.insert(0, 0)
+        else: Ф.insert(0, i)
+    return np.poly1d(F[::-1], variable=z), np.poly1d(Ф[::-1], variable=z)
+F=Lagrange(a_n, 'x')[0]
+Ф=Lagrange(a_n, 'x')[1]
+print(F,' = F(x)\n', Ф, ' = Ф(x)')
+def find_alpha(f):
+    alpha=1
+    while f(alpha)<=0:
+        alpha=alpha+1
+    return alpha
+alpha=find_alpha(F)
+print(f'\nα={alpha}>0: F(α) = {F(alpha)} > 0, отже ∀ x* =< {alpha}')
+
+
+print('Для нижньої межі: зробимо заміну x=1/y і отримаємо наступне рівняння:')
+print(np.poly1d(a_n, variable='y'))
+def cheking(mas, z):
+    if mas[0]<0:
+        res=[]
+        for i in range(len(mas)):
+            res.append((-1*mas[i]))
+        print('Домножимо на -1:\n', np.poly1d(res, variable=z))
+    else: res=mas
+    return res
+a_nn=cheking(a_n, 'y')
+F=Lagrange(a_nn[::-1], 'y')[0]
+Ф=Lagrange(a_nn[::-1], 'y')[1]
+print(F,' = F(x)\n', Ф, ' = Ф(x)')
+alpha1=1/find_alpha(F)
+print(f'\nα={1/alpha1}>0: F(α) = {F(1/alpha1)} > 0, отже ∀ x* >= {alpha1}')
+
+print("Уточнимо нижню межу від'ємних коренів: зробимо заміну x=-x і отримаємо наступне рівняння:")
+def sign(mas):
+    res=[]
+    for i in mas: res.append(i)
+    for i in range(len(res)):
+        if i%2==1: res[i]=-1*res[i]
+    return res
+print(np.poly1d(sign(a_n)[::-1]))
+a_nn=cheking(sign(a_n)[::-1], 'x')
+F=Lagrange(a_nn[::-1], 'x')[0]
+Ф=Lagrange(a_nn[::-1], 'x')[1]
+print(F,' = F(x)\n', Ф, ' = Ф(x)')
+alpha2=-find_alpha(F)
+print(f'\nα={-alpha2}>0: F(α) = {F(-alpha2)} > 0, отже ∀ x- >= {alpha2}')
+
+print("Уточнимо верхню межу від'ємних коренів: зробимо заміну x=-1/y і отримаємо наступне рівняння:")
+print(np.poly1d(sign(a_n[::-1])[::-1], variable='y'))
+a_nn=cheking(sign(a_n[::-1])[::-1], 'y')
+F=Lagrange(a_nn[::-1], 'y')[0]
+Ф=Lagrange(a_nn[::-1], 'y')[1]
+print(F,' = F(x)\n', Ф, ' = Ф(x)')
+alpha3=-1/find_alpha(F)
+print(f'\nα={-1/alpha3}>0: F(α) = {F(-1/alpha3)} > 0, отже ∀ x- <= {alpha3}')
 
 print('Теорема про кільце:')
 A=abs(max(a_n[1:], key=abs))
@@ -56,41 +112,22 @@ print(f'R = {R1} - верхня межа додатніх коренів.')
 
 print('Для знаходження нижньої межі додатніх коренів зробимо заміну x=1/y і отримаємо наступне рівняння:')
 print(np.poly1d(a_n, variable='y'))
-if a_n[0]<0:
-    a_nn=[]
-    for i in range(len(a_n)):
-        a_nn.append((-1*a_n[i]))
-    print('Домножимо на -1:\n', np.poly1d(a_nn, variable='y'))
-else: a_nn=a_n
-a_nn.reverse()
-print(a_nn)
-R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+a_nn=cheking(a_n, 'y')
+R=1+math.pow((B/a_nn[::-1][len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn[::-1])))
 R2=1/R
 print(f'R = {R2} - нижня межа додатніх коренів.')
 
-
 print("Для знаходження нижньої межі від'ємних коренів зробимо заміну x=-x і отримаємо наступне рівняння:")
-a_n.reverse()
-for i in range(len(a_n)):
-    if i%2==0: a_n[i]=-a_n[i]
-print(np.poly1d(a_n))
-if a_n[0]<0:
-    a_nn=[]
-    for i in range(len(a_n)):
-        a_nn.append((-1*a_n[i]))
-    print('Домножимо на -1:\n', np.poly1d(a_nn))
-else: a_nn=a_n
-a_nn.reverse()
-print(a_nn)
-R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+print(np.poly1d(sign(a_n)[::-1]))
+a_nn=cheking(sign(a_n)[::-1], 'x')
+R=1+math.pow((B/a_nn[::-1][len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn[::-1])))
 R3=-1*R
 print(f"R = {R3} - нижня межа від'ємних коренів.")
 
 print("Для знаходження верхньої межі від'ємних коренів зробимо заміну x=-1/y і отримаємо наступне рівняння:")
-print(np.poly1d(a_nn, variable='y'))
-a_nn.reverse()
-print(a_nn)
-R=1+math.pow((B/a_nn[len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn)))
+print(np.poly1d(sign(a_n[::-1])[::-1], variable='y'))
+a_nn=cheking(sign(a_n[::-1])[::-1], 'y')
+R=1+math.pow((B/a_nn[::-1][len(a_nn)-1]), 1/(len(a_nn)-1-find(a_nn[::-1])))
 R4=-1/R
 print(f"R = {R4} - верхня межа від'ємних коренів.")
 
@@ -107,7 +144,7 @@ for i in range(1, len(a_n)-1):
 
 
 print('Теорема Штурма:')
-f=np.poly1d([1, 1, -2, -9, -3, -2])
+f=np.poly1d(a_n)
 print(f)
 f0=f
 f1=np.poly1d([5, 4, -6, -18, -3])
@@ -124,12 +161,13 @@ print(mas[1], ' = f3')
 print(mas[2], ' = f4')
 print(mas[3], ' = f5')
 
-a=max(left, R2)
+a=max(left, R2, alpha1)
 b=min(alpha, rigth, R1)
-c=R4
-d=R3
+c=-min(abs(alpha3), abs(R4))
+d=-min(abs(R3), abs(alpha2))
 points=[d, c, a, b]
 eps=0.00001
+
 
 df=pd.DataFrame({'f': ['f0', 'f1', 'f2', 'f3', 'f4', 'f5'], f'f({d})':[f'{f0(d)}', f'{f1(d)}', f'{f2(d)}', f'{f3(d)}', f'{f4(d)}', f'{f5(d)}'], f'f({c})':[f'{f0(c)}', f'{f1(c)}', f'{f2(c)}', f'{f3(c)}', f'{f4(c)}', f'{f5(c)}'], f'f({a})':[f'{f0(a)}', f'{f1(a)}', f'{f2(a)}', f'{f3(a)}', f'{f4(a)}', f'{f5(a)}'], f'f({b})':[f'{f0(b)}', f'{f1(b)}', f'{f2(b)}', f'{f3(b)}', f'{f4(b)}', f'{f5(b)}']})
 df.set_index('f')
