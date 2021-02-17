@@ -205,14 +205,19 @@ print('Метод бісекції:')
 x_bisection=bisection(a, b)
 print(f'Корінь рівняння з проміжку [{a}, {b}] дорівнює: ', x_bisection)
 
+x=np.linspace(1, 3, 100) 
+plt.figure(figsize=(3, 3))
+plt.grid()
+plt.axis([1, 3, -25, 50])
+plt.plot(x, func(x))
+
 def horda(x, y):
     i=0
     z=(x*func(y)-y*func(x))/(func(y)-func(x))
     while abs(func(z))>eps:
         i=i+1
         z=(x*func(y)-y*func(x))/(func(y)-func(x))
-        if func(x)*func(z)<=0:
-            y=z
+        if func(a)>0: y=z
         else: x=z 
         print(f'{i}) a = {x}, b = {y}')
     return (x*func(y)-y*func(x))/(func(y)-func(x))
