@@ -9,8 +9,7 @@ import numpy as np
 def Gauss(AA):
     A=AA
     print(AA, ' = A')
-    B=[]; X=[]
-    x=['x1', 'x2', 'x3', 'x4', 'x5']
+    B=[]
     while len(A)!=0:
         m=A[0][0]
         for i in range(len(A)):
@@ -28,11 +27,6 @@ def Gauss(AA):
             v=A[i][q].copy()
             A[i][q]=A[i][0]
             A[i][0]=v
-        r=x[q]
-        x[q]=x[0]
-        x[0]=r
-        X.append(x)
-        x=x[1:]
         M=len(A)*[0]
         for k in range(len(A)):
             if k==0: continue
@@ -68,17 +62,30 @@ def Gauss(AA):
                 result=result-r*res[k]
                 k=k+1
         res.insert(0, result)
-    B=res[::-1]
-    mas=zip(reversed(X), B)
-    xs=sorted(mas, key=lambda tup: tup[0])
-    B=[b[1] for b in xs]
-    print('res = ', B)
-    return A, B
+    print('\nx = ', res)
+    return A, res
     
-B=np.array([[1.0, 5.0, 3.0, -4.0, 20.0],
-            [3.0, 1.0, -2.0, 0.0, 9.0],
-            [5.0, -7.0, 0.0, 10.0, -9.0],
-            [0.0, 3.0, -5.0, 0.0, 1.0]])
+def checking(mas, x, v):
+    return mas.dot(np.transpose((np.matrix(x))))-np.transpose((np.matrix(v)))
 
-Gauss(B)
+def join(A, w):
+    D=np.zeros((len(A), len(A)+1))
+    for i in range(len(A)):
+        D[i]=np.append(A[i], w[i])
+    return D
+
+M=np.array([[3.81, 0.25, 1.28, 1.75],
+            [2.25, 1.32, 5.58, 0.49],
+            [5.31, 7.28, 0.98, 1.04],
+            [10.39, 2.45, 3.35, 2.28]])
+
+b=[4.21, 8.97, 2.38, 12.98] 
+
+
+A=join(M, b)
+r=Gauss(A)
+print("\nРозв'язок за допомогою програмного пакету Python:\n")
+print(np.linalg.solve(M, b))
+print('\nAx-b = \n', checking(M, r[1], b))
+
 
