@@ -38,8 +38,27 @@ def split(mat):
         D[i]=mat[i][:-1]
     return D, v
 
+def make_C(mat):
+    c=np.zeros((len(mat), len(mat)))
+    for i in range(len(c)):
+        for j in range(len(c)):
+            if i==j: continue
+            else: c[i][j]=-mat[i][j]/mat[i][i]
+    return c
+
+def check_simetric(mat):
+    for i in range(len(mat)):
+        for j in range(len(mat)):
+            if mat[i][j]==mat[j][i]:
+                continue
+            else: 
+                return False
+                break
+    return True
+
 def iter_Zeidel(mat, v, x0, e):
     true = True
+    check=check_simetric(mat)
     iter=0
     while true:
         iter=iter+1
@@ -47,22 +66,26 @@ def iter_Zeidel(mat, v, x0, e):
         for i in range(len(mat)):
             summ=0
             for j in range(0, i):
-                summ=summ+mat[i][j]*x1[j]
-            x1[i]=v[i]-summ
+                if check is True: summ=summ-mat[i][j]*x1[j]
+                else:summ=summ+mat[i][j]*x1[j]
+            x1[i]=v[i]+summ
             summ=0
             for j in range(i+1, len(mat)):
-                summ=summ+mat[i][j]*x0[j]
-            x1[i]=x1[i]-summ
-            x1[i]=x1[i]/mat[i][i]
-        true = max(abs(x1[i]-x0[i]) for i in range(len(mat)))>e
+                if check is True: summ=summ-mat[i][j]*x0[j]
+                else:summ=summ+mat[i][j]*x0[j]
+            x1[i]=x1[i]+summ
+            if check is True: x1[i]=x1[i]/mat[i][i]
+        true = max(abs(x1[i]-x0[i]) for i in range(len(mat)))>=e
         x0 = x1
-        r=abs(v-np.dot(mat, x0))
-        print(f'{iter}) x = ', x0)
+        if check is True: r=abs(v-np.dot(mat, x0))
+        else: r=abs(b1-np.dot(M, x0))
+        print(f'{iter}) x = ', x0[::-1])
         gap=(len(str(iter))+2)*' '
         print(f'{gap}r = |A-b*x| = ', r)
-    print('\nВідповідь: x = ', x0)
+    res=x0 if check is True else x0[::-1]
+    print('\nВідповідь: x = ', res)
     print('\n           r = |A-b*x| = ', r)
-    return x0
+    return res
 
 AA=np.array([[3.81, 0.25, 1.28, 1.75],
             [2.25, 1.32, 5.58, 0.49],
@@ -98,14 +121,34 @@ b1=split(A)[1]
 
 print('\nОстаточні результати: \n\n', M, ' = A\n\n b = ', b1)
 
-print('\nA^T*A = \n', np.dot(np.transpose(AA), AA))
-print('\nA^T*b = \n', np.dot(np.transpose(AA), b))
+C=make_C(M)
+b2=[]
+for i in range(len(M)):
+    b2.append(b1[i]/M[i][i])
+
 
 X = [0.001, 0.001, 0.001, 0.001]           
-eps=0.0000001
-
+eps=0.0001
+print('\nУтворимо матрицю С:\n')
+print(C)
+print('\nТоді вектор b:\n')
+print(b2)
+#for i in range(len(C)):
+#    res=0
+#    for j in range(len(C)):
+#        res=res+C[i][j]
+#    print(res)
 #print('\n')
-#print(iter_Zeidel(M, b1, X, eps))
-print('\n')
-iter_Zeidel(np.dot(np.transpose(AA), AA), np.dot(np.transpose(AA), b), X, eps)
 
+print('\nМетод Зейделя для матриці С:\n')
+iter_Zeidel(C, b2, X, eps)
+
+print('\nДомножимо рівняння Ax=b на А транспоновану і отримаємо наступні матриці:')
+A=np.dot(np.transpose(AA), AA)
+b=np.dot(np.transpose(AA), b)
+print('\nA^T*A = \n', A)
+print('\nA^T*b = \n', b)
+print('\nМетод Зейделя для матриці A^T*A:\n')
+iter_Zeidel(A, b, X, eps)
+print("\nРозв'язок за допомогою програмного пакету Python:\n")
+print(np.linalg.solve(AA, np.array([4.21, 8.97, 2.38, 12.98])))
