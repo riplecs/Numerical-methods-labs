@@ -63,11 +63,9 @@ def Jakobi(M):
         M1=((np.transpose(H)).dot(M0)).dot(H)
         main=max_up_diag(M1)
         M0=M1
-    lambdas=[]
+    print('Власні числа:')
     for i in range(len(M0)):
-        lambdas.append(M0[i][i])
-    for i in range(len(lambdas)):
-        print(f'λ_{i} = ', lambdas[i])
+        print(f'λ_{i} = ', M0[i][i])
     print('Власні вектори:')
     for i in range(len(v)):
         print(np.transpose(vectors(v, i)), f' = v_{i+1}')
