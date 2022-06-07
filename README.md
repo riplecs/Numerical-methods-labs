@@ -1,0 +1,6 @@
+- laba1: solution of nonlinear equations
+- lab2: solving systems by Gaussian method
+- laba3: solving systems by Seidel's method
+- laba4: calculation of eigenvalues by Jacobi method (rotations)
+- laba5: interpolation 
+- laba6: solving the Cauchy problem
